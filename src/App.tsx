@@ -1,35 +1,101 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { useRef, useCallback } from 'react';
+import Map, { Source, Layer, useMap } from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
-function App() {
-  const [count, setCount] = useState(0);
+import type { FeatureCollection, Point } from 'geojson';
+
+import css from './App.module.css'
+
+
+const INITIAL_DATA: FeatureCollection<Point> = {
+  type: 'FeatureCollection',
+  features: [{
+    type: 'Feature',
+    id: 1,
+    geometry: {
+      type: 'Point',
+      coordinates: [-118.2437, 34.0522]
+    },
+    properties: { name: 'Moving Marker' }
+  }]
+};
+
+function MapContent() {
+  const { current: map } = useMap();
+
+  // 3. Typed Refs
+  const dataRef = useRef<FeatureCollection<Point>>(INITIAL_DATA);
+  const animationRef = useRef<number | null>(null);
+
+  const startDirectAnimation = useCallback((targetLng: number, targetLat: number) => {
+    // Safety check for map instance and existing feature
+    if (!map || !dataRef.current.features[0]) return;
+
+    const start = dataRef.current.features[0].geometry.coordinates as [number, number];
+    const end: [number, number] = [targetLng, targetLat];
+    let startTime: number | null = null;
+
+    const frame = (time: number) => {
+      if (!startTime) startTime = time;
+      const progress = Math.min((time - startTime) / 1000, 1);
+
+      const lng = start[0] + (end[0] - start[0]) * progress;
+      const lat = start[1] + (end[1] - start[1]) * progress;
+      dataRef.current.features[0].geometry.coordinates = [lng, lat];
+
+      // Cast the source to GeoJSONSource to access .setData()
+      const source = map.getSource('moving-source') as maplibregl.GeoJSONSource;
+
+      if (source) {
+        source.setData(dataRef.current);
+      }
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(frame);
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(frame);
+  }, [map]);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <button
+        className={css.button}
+        onClick={() => startDirectAnimation(-118.26, 34.04)}
+      >
+        Move to LA Live
+      </button>
+
+      <Source id="moving-source" type="geojson" data={dataRef.current}>
+        <Layer
+          id="point-layer"
+          type="circle"
+          paint={{
+            'circle-radius': 12,
+            'circle-color': '#ef4444',
+            'circle-stroke-width': 3,
+            'circle-stroke-color': '#ffffff'
+          }}
+        />
+      </Source>
     </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Map
+      id="my-map"
+      initialViewState={{
+        longitude: -118.25,
+        latitude: 34.035,
+        zoom: 12
+      }}
+      style={{ width: '100vw', height: '100vh' }}
+      mapStyle="https://tiles.openfreemap.org/styles/liberty"
+    >
+      <MapContent />
+    </Map>
+  );
+}
