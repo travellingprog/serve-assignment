@@ -42,7 +42,7 @@ function pointInPolygon(point, vs) {
   const x = point[1],
     y = point[0]
   let inside = false
-  for (let i = 0, j = vs.length - 1 i < vs.length j = i++) {
+  for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
     const xi = vs[i][1],
       yi = vs[i][0]
     const xj = vs[j][1],
@@ -61,7 +61,7 @@ function randomPointInPolygon(polygonLatLng) {
     maxLat = Math.max(...lats)
   const minLng = Math.min(...lngs),
     maxLng = Math.max(...lngs)
-  for (let i = 0 i < 1000 i++) {
+  for (let i = 0; i < 1000; i++) {
     const lat = minLat + Math.random() * (maxLat - minLat)
     const lng = minLng + Math.random() * (maxLng - minLng)
     if (pointInPolygon([lat, lng], polygonLatLng)) return [lat, lng]
@@ -85,7 +85,7 @@ function moveByMeters([lat, lng], meters) {
 let robots = []
 function initRobots(count) {
   robots = []
-  for (let i = 0 i < count i++) {
+  for (let i = 0; i < count; i++) {
     robots.push(randomPointInPolygon(polygon))
   }
 }
