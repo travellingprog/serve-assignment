@@ -8,7 +8,7 @@ async function fetcher<T>(url: string, init?: RequestInit): Promise<T> {
   return fetch(url, init).then(r => r.json())
 }
 
-interface Robot {
+export interface Robot {
   index: number
   position: [number, number]
 }
