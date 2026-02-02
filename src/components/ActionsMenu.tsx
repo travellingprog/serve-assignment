@@ -8,6 +8,8 @@ import { LuChevronDown } from "react-icons/lu"
 
 import { MoveRobotsDialog } from "@/components/MoveRobotsDialog";
 import { ResetDialog } from "@/components/ResetDialog";
+import { StartAutoDialog } from "@/components/StartAutoDialog";
+import { StopAutoDialog } from "@/components/StopAutoDialog";
 import { useAutoStepRobots } from "@/hooks/api";
 
 export function ActionsMenu() {
@@ -44,6 +46,22 @@ export function ActionsMenu() {
       <MoveRobotsDialog open={dialog === 'move'} onClose={() => setDialog(null)} />
 
       <ResetDialog open={dialog === 'reset'} onClose={() => setDialog(null)} />
+
+      <StartAutoDialog
+        open={dialog === 'startAuto'}
+        onClose={() => setDialog(null)}
+        startAuto={autoStepRobots.startAuto}
+        errorMsg={autoStepRobots.errorMsg}
+        isMutating={autoStepRobots.isMutating}
+      />
+
+      <StopAutoDialog
+        open={dialog === 'stopAuto'}
+        onClose={() => setDialog(null)}
+        stopAuto={autoStepRobots.stopAuto}
+        errorMsg={autoStepRobots.errorMsg}
+        isMutating={autoStepRobots.isMutating}
+      />
     </>
   )
 }

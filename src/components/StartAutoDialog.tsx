@@ -9,45 +9,53 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 
+import { useAutoStepRobots } from "@/hooks/api"
 import { toaster } from "@/components/ui/toaster"
-import { useMoveRobots } from '@/hooks/api';
 
 import type { SubmitEvent } from 'react'
 
 interface Props {
   open: boolean
   onClose: () => void
+  startAuto: ReturnType<typeof useAutoStepRobots>['startAuto']
+  errorMsg: ReturnType<typeof useAutoStepRobots>['errorMsg']
+  isMutating: ReturnType<typeof useAutoStepRobots>['isMutating']
 }
 
-export function MoveRobotsDialog(props: Props) {
+export function StartAutoDialog(props: Props) {
   const [meters, setMeters] = useState('')
-  const { trigger, errorMsg, isMutating } = useMoveRobots()
+  const [intervalMs, setIntervalMs] = useState('')
+  const { startAuto, errorMsg, isMutating, open } = props
 
   useEffect(() => {
-    if (errorMsg) {
+    if (errorMsg && open) {
       toaster.create({
         description: errorMsg,
         type: "error",
         closable: true,
       })
     }
-  }, [errorMsg])
+  }, [errorMsg, open])
 
   function onClose() {
     props.onClose()
     setMeters('')
+    setIntervalMs('')
   }
 
   async function onSubmit(event: SubmitEvent) {
     event.preventDefault()
-    await trigger({ meters: meters ? Number(meters) : undefined })
+    await startAuto({
+      meters: meters ? Number(meters) : undefined,
+      intervalMs: intervalMs ? Number(intervalMs) : undefined,
+    })
     onClose()
   }
 
   return (
     <>
       <Dialog.Root
-        open={props.open}
+        open={open}
         size="md"
         onOpenChange={(e) => {
           if (!e.open) onClose()
@@ -61,13 +69,13 @@ export function MoveRobotsDialog(props: Props) {
                 <CloseButton />
               </Dialog.CloseTrigger>
               <Dialog.Header>
-                <Dialog.Title>Move Robots</Dialog.Title>
+                <Dialog.Title>Start Auto-Step</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body asChild>
-                <form id="moveForm" onSubmit={onSubmit}>
+                <form id="startAutoForm" onSubmit={onSubmit}>
                   <Field.Root>
                     <Field.Label>
-                      Move all robots by X meters
+                      Move all robots every X milliseconds
                       <Field.RequiredIndicator
                         fallback={
                           <Badge size="xs" variant="surface">
@@ -76,7 +84,23 @@ export function MoveRobotsDialog(props: Props) {
                         }
                       />
                     </Field.Label>
-                    <NumberInput.Root value={meters} onValueChange={({ value }) => {setMeters(value)}} min={1} width="200px" inputMode="numeric">
+                    <NumberInput.Root value={intervalMs} onValueChange={({ value }) => {setIntervalMs(value)}} min={0} width="200px" inputMode="numeric">
+                      <NumberInput.Control />
+                      <NumberInput.Input />
+                    </NumberInput.Root>
+                  </Field.Root>
+                  <Field.Root>
+                    <Field.Label>
+                      Move by X meters
+                      <Field.RequiredIndicator
+                        fallback={
+                          <Badge size="xs" variant="surface">
+                            Optional
+                          </Badge>
+                        }
+                      />
+                    </Field.Label>
+                    <NumberInput.Root value={meters} onValueChange={({ value }) => {setMeters(value)}} min={0} width="200px" inputMode="numeric">
                       <NumberInput.Control />
                       <NumberInput.Input />
                     </NumberInput.Root>
@@ -87,7 +111,7 @@ export function MoveRobotsDialog(props: Props) {
                 <Button disabled={isMutating} variant="outline" onClick={() => onClose()}>
                   Cancel
                 </Button>
-                <Button disabled={isMutating} colorPalette="green" form="moveForm" type="submit">Move</Button>
+                <Button disabled={isMutating} colorPalette="green" form="startAutoForm" type="submit">Start</Button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>

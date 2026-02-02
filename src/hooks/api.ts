@@ -149,8 +149,10 @@ export function useAutoStepRobots() {
 
   const startMutation = useSWRMutation('/start-auto', postStartAuto, {
     onSuccess(data) {
+      console.log('start success')
       const newAutoId = setInterval(() => { mutate(ROBOTS_KEY) }, data.intervalMs)
       setAutoId(newAutoId)
+      console.log('newAutoId', newAutoId)
     },
     onError(err) {
       console.error('Failed to auto-step the robots:', err)

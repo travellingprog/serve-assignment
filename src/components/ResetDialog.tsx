@@ -38,13 +38,10 @@ export function ResetDialog(props: Props) {
     setCount('')
   }
 
-  function onSubmit(event: SubmitEvent) {
+  async function onSubmit(event: SubmitEvent) {
     event.preventDefault()
-    trigger({ count: count ? Number(count) : undefined }, {
-      onSuccess() {
-        onClose()
-      }
-    })
+    await trigger({ count: count ? Number(count) : undefined })
+    onClose()
   }
 
   return (
