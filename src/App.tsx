@@ -2,12 +2,12 @@ import { useRef, useCallback, useEffect } from 'react';
 import Map, { Source, Layer, useMap } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { useAutoStepRobots, useMoveRobots, useReset, useRobots } from './hooks/api';
+import { ActionsMenu } from '@/components/ActionsMenu';
+import { Toaster } from "@/components/ui/toaster";
+import { useRobots } from '@/hooks/api';
 
 import type { FeatureCollection, Point } from 'geojson';
 import type { Robot } from './hooks/api';
-
-import css from './App.module.css'
 
 function robotsToPointCollection(robots: Robot[]): FeatureCollection<Point> {
   return {
@@ -30,7 +30,6 @@ function MapContent() {
   const dataRef = useRef<FeatureCollection<Point>>(robotsToPointCollection(robots));
 
   useEffect(() => {
-    console.log('effect triggered')
     // Safety check for map instance
     if (!map) return;
 
@@ -40,12 +39,15 @@ function MapContent() {
     const source = map.getSource('robots-source') as maplibregl.GeoJSONSource;
     if (source) {
       source.setData(dataRef.current);
-      console.log('set the data')
     }
   }, [map, robots])
 
   return (
     <>
+      <Toaster />
+      <ActionsMenu />
+
+      {/* eslint-disable-next-line react-hooks/refs */}
       <Source id="robots-source" type="geojson" data={dataRef.current}>
         <Layer
           id="point-layer"
@@ -62,6 +64,7 @@ function MapContent() {
   );
 }
 
+// TODO Delete
 const INITIAL_DATA: FeatureCollection<Point> = {
   type: 'FeatureCollection',
   features: [{
@@ -75,6 +78,7 @@ const INITIAL_DATA: FeatureCollection<Point> = {
   }]
 };
 
+// TODO Delete
 function MapContentOld() {
   const { current: map } = useMap();
 
@@ -115,7 +119,6 @@ function MapContentOld() {
   return (
     <>
       <button
-        className={css.button}
         onClick={() => startDirectAnimation(-118.26, 34.04)}
       >
         Move to LA Live

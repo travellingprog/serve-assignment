@@ -4,6 +4,9 @@ import useSWRMutation from 'swr/mutation'
 
 const ROBOTS_KEY = '/robots'
 
+const postHeaders = new Headers()
+postHeaders.append('Content-Type', 'application/json')
+
 async function fetcher<T>(url: string, init?: RequestInit): Promise<T> {
   return fetch(url, init).then(r => r.json())
 }
@@ -54,6 +57,7 @@ interface ReqMove {
 function postMoveRobots(_url: string, { arg }: { arg: ReqMove }) {
   return fetcher<RespRobots>('/move', {
     method: 'POST',
+    headers: postHeaders,
     body: JSON.stringify(arg)
   })
 }
@@ -83,6 +87,7 @@ interface ReqReset {
 function postReset(_url: string, { arg }: { arg: ReqReset }) {
   return fetcher<RespRobots>('/reset', {
     method: 'POST',
+    headers: postHeaders,
     body: JSON.stringify(arg)
   })
 }
@@ -123,13 +128,17 @@ interface RespStopAuto {
 function postStartAuto(_url: string, { arg }: { arg: ReqStartAuto }) {
   return fetcher<RespStartAuto>('/start-auto', {
     method: 'POST',
-    body: JSON.stringify(arg)
+    headers: postHeaders,
+    body: JSON.stringify(arg),
   })
 }
 
 /** Send an API request to stop auto-stepping the robots */
 function postStopAuto() {
-  return fetcher<RespStopAuto>('/stop-auto', { method: 'POST' })
+  return fetcher<RespStopAuto>('/stop-auto', {
+    method: 'POST',
+    headers: postHeaders,
+  })
 }
 
 /** Auto-step the robots */
