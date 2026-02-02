@@ -1,10 +1,6 @@
-import {
-  Button,
-  Menu,
-  Portal,
-} from "@chakra-ui/react"
-import { useState } from "react"
-import { LuChevronDown } from "react-icons/lu"
+import { Button, Menu, Portal } from "@chakra-ui/react";
+import { useState } from "react";
+import { LuChevronDown } from "react-icons/lu";
 
 import { MoveRobotsDialog } from "@/components/MoveRobotsDialog";
 import { ResetDialog } from "@/components/ResetDialog";
@@ -14,14 +10,16 @@ import { useAutoStepRobots } from "@/hooks/api";
 
 /** Our menu of possible actions that the user can take */
 export function ActionsMenu() {
-  const [dialog, setDialog] = useState<string | null>(null)
-  const autoStepRobots = useAutoStepRobots()
+  const [dialog, setDialog] = useState<string | null>(null);
+  const autoStepRobots = useAutoStepRobots();
 
   return (
     <>
-      <Menu.Root onSelect={(details) => {
-        setDialog(details.value)
-      }}>
+      <Menu.Root
+        onSelect={(details) => {
+          setDialog(details.value);
+        }}
+      >
         <Menu.Trigger asChild>
           <Button variant="solid" position="fixed" top="4" left="4" zIndex={10}>
             Actions <LuChevronDown />
@@ -44,12 +42,15 @@ export function ActionsMenu() {
         </Portal>
       </Menu.Root>
 
-      <MoveRobotsDialog open={dialog === 'move'} onClose={() => setDialog(null)} />
+      <MoveRobotsDialog
+        open={dialog === "move"}
+        onClose={() => setDialog(null)}
+      />
 
-      <ResetDialog open={dialog === 'reset'} onClose={() => setDialog(null)} />
+      <ResetDialog open={dialog === "reset"} onClose={() => setDialog(null)} />
 
       <StartAutoDialog
-        open={dialog === 'startAuto'}
+        open={dialog === "startAuto"}
         onClose={() => setDialog(null)}
         startAuto={autoStepRobots.startAuto}
         errorMsg={autoStepRobots.errorMsg}
@@ -57,12 +58,12 @@ export function ActionsMenu() {
       />
 
       <StopAutoDialog
-        open={dialog === 'stopAuto'}
+        open={dialog === "stopAuto"}
         onClose={() => setDialog(null)}
         stopAuto={autoStepRobots.stopAuto}
         errorMsg={autoStepRobots.errorMsg}
         isMutating={autoStepRobots.isMutating}
       />
     </>
-  )
+  );
 }

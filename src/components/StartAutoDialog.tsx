@@ -6,27 +6,27 @@ import {
   Field,
   NumberInput,
   Portal,
-} from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 
-import { useAutoStepRobots } from "@/hooks/api"
-import { toaster } from "@/components/ui/toaster"
+import { useAutoStepRobots } from "@/hooks/api";
+import { toaster } from "@/components/ui/toaster";
 
-import type { SubmitEvent } from 'react'
+import type { SubmitEvent } from "react";
 
 interface Props {
-  open: boolean
-  onClose: () => void
-  startAuto: ReturnType<typeof useAutoStepRobots>['startAuto']
-  errorMsg: ReturnType<typeof useAutoStepRobots>['errorMsg']
-  isMutating: ReturnType<typeof useAutoStepRobots>['isMutating']
+  open: boolean;
+  onClose: () => void;
+  startAuto: ReturnType<typeof useAutoStepRobots>["startAuto"];
+  errorMsg: ReturnType<typeof useAutoStepRobots>["errorMsg"];
+  isMutating: ReturnType<typeof useAutoStepRobots>["isMutating"];
 }
 
 /** Our dialog to make all robots move automatically */
 export function StartAutoDialog(props: Props) {
-  const [meters, setMeters] = useState('')
-  const [intervalSec, setIntervalSec] = useState('')
-  const { startAuto, errorMsg, isMutating, open } = props
+  const [meters, setMeters] = useState("");
+  const [intervalSec, setIntervalSec] = useState("");
+  const { startAuto, errorMsg, isMutating, open } = props;
 
   useEffect(() => {
     if (errorMsg && open) {
@@ -34,23 +34,23 @@ export function StartAutoDialog(props: Props) {
         description: errorMsg,
         type: "error",
         closable: true,
-      })
+      });
     }
-  }, [errorMsg, open])
+  }, [errorMsg, open]);
 
   function onClose() {
-    props.onClose()
-    setMeters('')
-    setIntervalSec('')
+    props.onClose();
+    setMeters("");
+    setIntervalSec("");
   }
 
   async function onSubmit(event: SubmitEvent) {
-    event.preventDefault()
+    event.preventDefault();
     await startAuto({
       meters: meters ? Number(meters) : undefined,
       intervalMs: intervalSec ? Number(intervalSec) * 1000 : undefined,
-    })
-    onClose()
+    });
+    onClose();
   }
 
   return (
@@ -59,7 +59,7 @@ export function StartAutoDialog(props: Props) {
         open={open}
         size="md"
         onOpenChange={(e) => {
-          if (!e.open) onClose()
+          if (!e.open) onClose();
         }}
       >
         <Portal>
@@ -85,7 +85,15 @@ export function StartAutoDialog(props: Props) {
                         }
                       />
                     </Field.Label>
-                    <NumberInput.Root value={intervalSec} onValueChange={({ value }) => {setIntervalSec(value)}} min={0} width="200px" inputMode="numeric">
+                    <NumberInput.Root
+                      value={intervalSec}
+                      onValueChange={({ value }) => {
+                        setIntervalSec(value);
+                      }}
+                      min={0}
+                      width="200px"
+                      inputMode="numeric"
+                    >
                       <NumberInput.Control />
                       <NumberInput.Input />
                     </NumberInput.Root>
@@ -101,7 +109,15 @@ export function StartAutoDialog(props: Props) {
                         }
                       />
                     </Field.Label>
-                    <NumberInput.Root value={meters} onValueChange={({ value }) => {setMeters(value)}} min={0} width="200px" inputMode="numeric">
+                    <NumberInput.Root
+                      value={meters}
+                      onValueChange={({ value }) => {
+                        setMeters(value);
+                      }}
+                      min={0}
+                      width="200px"
+                      inputMode="numeric"
+                    >
                       <NumberInput.Control />
                       <NumberInput.Input />
                     </NumberInput.Root>
@@ -109,15 +125,26 @@ export function StartAutoDialog(props: Props) {
                 </form>
               </Dialog.Body>
               <Dialog.Footer>
-                <Button disabled={isMutating} variant="outline" onClick={() => onClose()}>
+                <Button
+                  disabled={isMutating}
+                  variant="outline"
+                  onClick={() => onClose()}
+                >
                   Cancel
                 </Button>
-                <Button disabled={isMutating} colorPalette="green" form="startAutoForm" type="submit">Start</Button>
+                <Button
+                  disabled={isMutating}
+                  colorPalette="green"
+                  form="startAutoForm"
+                  type="submit"
+                >
+                  Start
+                </Button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
     </>
-  )
+  );
 }

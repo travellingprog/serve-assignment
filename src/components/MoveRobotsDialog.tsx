@@ -6,23 +6,23 @@ import {
   Field,
   NumberInput,
   Portal,
-} from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 
-import { toaster } from "@/components/ui/toaster"
-import { useMoveRobots } from '@/hooks/api';
+import { toaster } from "@/components/ui/toaster";
+import { useMoveRobots } from "@/hooks/api";
 
-import type { SubmitEvent } from 'react'
+import type { SubmitEvent } from "react";
 
 interface Props {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
 }
 
 /** Our dialog to move all the robots a certain distance */
 export function MoveRobotsDialog(props: Props) {
-  const [meters, setMeters] = useState('')
-  const { trigger, errorMsg, isMutating } = useMoveRobots()
+  const [meters, setMeters] = useState("");
+  const { trigger, errorMsg, isMutating } = useMoveRobots();
 
   useEffect(() => {
     if (errorMsg) {
@@ -30,19 +30,19 @@ export function MoveRobotsDialog(props: Props) {
         description: errorMsg,
         type: "error",
         closable: true,
-      })
+      });
     }
-  }, [errorMsg])
+  }, [errorMsg]);
 
   function onClose() {
-    props.onClose()
-    setMeters('')
+    props.onClose();
+    setMeters("");
   }
 
   async function onSubmit(event: SubmitEvent) {
-    event.preventDefault()
-    await trigger({ meters: meters ? Number(meters) : undefined })
-    onClose()
+    event.preventDefault();
+    await trigger({ meters: meters ? Number(meters) : undefined });
+    onClose();
   }
 
   return (
@@ -51,7 +51,7 @@ export function MoveRobotsDialog(props: Props) {
         open={props.open}
         size="md"
         onOpenChange={(e) => {
-          if (!e.open) onClose()
+          if (!e.open) onClose();
         }}
       >
         <Portal>
@@ -77,7 +77,15 @@ export function MoveRobotsDialog(props: Props) {
                         }
                       />
                     </Field.Label>
-                    <NumberInput.Root value={meters} onValueChange={({ value }) => {setMeters(value)}} min={1} width="200px" inputMode="numeric">
+                    <NumberInput.Root
+                      value={meters}
+                      onValueChange={({ value }) => {
+                        setMeters(value);
+                      }}
+                      min={1}
+                      width="200px"
+                      inputMode="numeric"
+                    >
                       <NumberInput.Control />
                       <NumberInput.Input />
                     </NumberInput.Root>
@@ -85,15 +93,26 @@ export function MoveRobotsDialog(props: Props) {
                 </form>
               </Dialog.Body>
               <Dialog.Footer>
-                <Button disabled={isMutating} variant="outline" onClick={() => onClose()}>
+                <Button
+                  disabled={isMutating}
+                  variant="outline"
+                  onClick={() => onClose()}
+                >
                   Cancel
                 </Button>
-                <Button disabled={isMutating} colorPalette="green" form="moveForm" type="submit">Move</Button>
+                <Button
+                  disabled={isMutating}
+                  colorPalette="green"
+                  form="moveForm"
+                  type="submit"
+                >
+                  Move
+                </Button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
     </>
-  )
+  );
 }

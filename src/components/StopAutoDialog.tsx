@@ -1,25 +1,20 @@
-import {
-  Button,
-  CloseButton,
-  Dialog,
-  Portal,
-} from "@chakra-ui/react"
-import { useEffect } from "react"
+import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react";
+import { useEffect } from "react";
 
-import { useAutoStepRobots } from "@/hooks/api"
-import { toaster } from "@/components/ui/toaster"
+import { useAutoStepRobots } from "@/hooks/api";
+import { toaster } from "@/components/ui/toaster";
 
 interface Props {
-  open: boolean
-  onClose: () => void
-  stopAuto: ReturnType<typeof useAutoStepRobots>['stopAuto']
-  errorMsg: ReturnType<typeof useAutoStepRobots>['errorMsg']
-  isMutating: ReturnType<typeof useAutoStepRobots>['isMutating']
+  open: boolean;
+  onClose: () => void;
+  stopAuto: ReturnType<typeof useAutoStepRobots>["stopAuto"];
+  errorMsg: ReturnType<typeof useAutoStepRobots>["errorMsg"];
+  isMutating: ReturnType<typeof useAutoStepRobots>["isMutating"];
 }
 
 /** Our dialog to stop the automatic movement of the robots */
 export function StopAutoDialog(props: Props) {
-  const { stopAuto, errorMsg, isMutating, open } = props
+  const { stopAuto, errorMsg, isMutating, open } = props;
 
   useEffect(() => {
     if (errorMsg && open) {
@@ -27,17 +22,17 @@ export function StopAutoDialog(props: Props) {
         description: errorMsg,
         type: "error",
         closable: true,
-      })
+      });
     }
-  }, [errorMsg, open])
+  }, [errorMsg, open]);
 
   function onClose() {
-    props.onClose()
+    props.onClose();
   }
 
   async function onClick() {
-    await stopAuto()
-    onClose()
+    await stopAuto();
+    onClose();
   }
 
   return (
@@ -46,7 +41,7 @@ export function StopAutoDialog(props: Props) {
         open={open}
         size="md"
         onOpenChange={(e) => {
-          if (!e.open) onClose()
+          if (!e.open) onClose();
         }}
       >
         <Portal>
@@ -61,19 +56,30 @@ export function StopAutoDialog(props: Props) {
               </Dialog.Header>
               <Dialog.Body>
                 <p>
-                  Are you sure that you want to stop moving the robots automatically?
+                  Are you sure that you want to stop moving the robots
+                  automatically?
                 </p>
               </Dialog.Body>
               <Dialog.Footer>
-                <Button disabled={isMutating} variant="outline" onClick={() => onClose()}>
+                <Button
+                  disabled={isMutating}
+                  variant="outline"
+                  onClick={() => onClose()}
+                >
                   No
                 </Button>
-                <Button disabled={isMutating} colorPalette="green" onClick={onClick}>Yes</Button>
+                <Button
+                  disabled={isMutating}
+                  colorPalette="green"
+                  onClick={onClick}
+                >
+                  Yes
+                </Button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
     </>
-  )
+  );
 }

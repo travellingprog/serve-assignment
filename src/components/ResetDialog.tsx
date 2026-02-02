@@ -6,23 +6,23 @@ import {
   Field,
   NumberInput,
   Portal,
-} from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 
-import { toaster } from "@/components/ui/toaster"
-import { useReset } from '@/hooks/api';
+import { toaster } from "@/components/ui/toaster";
+import { useReset } from "@/hooks/api";
 
-import type { SubmitEvent } from 'react'
+import type { SubmitEvent } from "react";
 
 interface Props {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
 }
 
 /** Our dialog to re-spawn all robots, possibly with a different amount of them */
 export function ResetDialog(props: Props) {
-  const [count, setCount] = useState('')
-  const { trigger, errorMsg, isMutating } = useReset()
+  const [count, setCount] = useState("");
+  const { trigger, errorMsg, isMutating } = useReset();
 
   useEffect(() => {
     if (errorMsg) {
@@ -30,19 +30,19 @@ export function ResetDialog(props: Props) {
         description: errorMsg,
         type: "error",
         closable: true,
-      })
+      });
     }
-  }, [errorMsg])
+  }, [errorMsg]);
 
   function onClose() {
-    props.onClose()
-    setCount('')
+    props.onClose();
+    setCount("");
   }
 
   async function onSubmit(event: SubmitEvent) {
-    event.preventDefault()
-    await trigger({ count: count ? Number(count) : undefined })
-    onClose()
+    event.preventDefault();
+    await trigger({ count: count ? Number(count) : undefined });
+    onClose();
   }
 
   return (
@@ -51,7 +51,7 @@ export function ResetDialog(props: Props) {
         open={props.open}
         size="md"
         onOpenChange={(e) => {
-          if (!e.open) onClose()
+          if (!e.open) onClose();
         }}
       >
         <Portal>
@@ -77,7 +77,15 @@ export function ResetDialog(props: Props) {
                         }
                       />
                     </Field.Label>
-                    <NumberInput.Root value={count} onValueChange={({ value }) => {setCount(value)}} min={0} width="200px" inputMode="numeric">
+                    <NumberInput.Root
+                      value={count}
+                      onValueChange={({ value }) => {
+                        setCount(value);
+                      }}
+                      min={0}
+                      width="200px"
+                      inputMode="numeric"
+                    >
                       <NumberInput.Control />
                       <NumberInput.Input />
                     </NumberInput.Root>
@@ -85,15 +93,26 @@ export function ResetDialog(props: Props) {
                 </form>
               </Dialog.Body>
               <Dialog.Footer>
-                <Button disabled={isMutating} variant="outline" onClick={() => onClose()}>
+                <Button
+                  disabled={isMutating}
+                  variant="outline"
+                  onClick={() => onClose()}
+                >
                   Cancel
                 </Button>
-                <Button disabled={isMutating} colorPalette="green" form="resetForm" type="submit">Reset</Button>
+                <Button
+                  disabled={isMutating}
+                  colorPalette="green"
+                  form="resetForm"
+                  type="submit"
+                >
+                  Reset
+                </Button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
     </>
-  )
+  );
 }
