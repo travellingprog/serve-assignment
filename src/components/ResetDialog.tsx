@@ -19,6 +19,7 @@ interface Props {
   onClose: () => void
 }
 
+/** Our dialog to re-spawn all robots, possibly with a different amount of them */
 export function ResetDialog(props: Props) {
   const [count, setCount] = useState('')
   const { trigger, errorMsg, isMutating } = useReset()

@@ -17,6 +17,7 @@ interface Props {
   isMutating: ReturnType<typeof useAutoStepRobots>['isMutating']
 }
 
+/** Our dialog to stop the automatic movement of the robots */
 export function StopAutoDialog(props: Props) {
   const { stopAuto, errorMsg, isMutating, open } = props
 

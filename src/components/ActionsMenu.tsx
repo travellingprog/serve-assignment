@@ -12,6 +12,7 @@ import { StartAutoDialog } from "@/components/StartAutoDialog";
 import { StopAutoDialog } from "@/components/StopAutoDialog";
 import { useAutoStepRobots } from "@/hooks/api";
 
+/** Our menu of possible actions that the user can take */
 export function ActionsMenu() {
   const [dialog, setDialog] = useState<string | null>(null)
   const autoStepRobots = useAutoStepRobots()

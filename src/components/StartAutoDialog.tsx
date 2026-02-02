@@ -22,9 +22,10 @@ interface Props {
   isMutating: ReturnType<typeof useAutoStepRobots>['isMutating']
 }
 
+/** Our dialog to make all robots move automatically */
 export function StartAutoDialog(props: Props) {
   const [meters, setMeters] = useState('')
-  const [intervalMs, setIntervalMs] = useState('')
+  const [intervalSec, setIntervalSec] = useState('')
   const { startAuto, errorMsg, isMutating, open } = props
 
   useEffect(() => {
@@ -40,14 +41,14 @@ export function StartAutoDialog(props: Props) {
   function onClose() {
     props.onClose()
     setMeters('')
-    setIntervalMs('')
+    setIntervalSec('')
   }
 
   async function onSubmit(event: SubmitEvent) {
     event.preventDefault()
     await startAuto({
       meters: meters ? Number(meters) : undefined,
-      intervalMs: intervalMs ? Number(intervalMs) : undefined,
+      intervalMs: intervalSec ? Number(intervalSec) * 1000 : undefined,
     })
     onClose()
   }
@@ -75,7 +76,7 @@ export function StartAutoDialog(props: Props) {
                 <form id="startAutoForm" onSubmit={onSubmit}>
                   <Field.Root>
                     <Field.Label>
-                      Move all robots every X milliseconds
+                      Move all robots every X seconds
                       <Field.RequiredIndicator
                         fallback={
                           <Badge size="xs" variant="surface">
@@ -84,7 +85,7 @@ export function StartAutoDialog(props: Props) {
                         }
                       />
                     </Field.Label>
-                    <NumberInput.Root value={intervalMs} onValueChange={({ value }) => {setIntervalMs(value)}} min={0} width="200px" inputMode="numeric">
+                    <NumberInput.Root value={intervalSec} onValueChange={({ value }) => {setIntervalSec(value)}} min={0} width="200px" inputMode="numeric">
                       <NumberInput.Control />
                       <NumberInput.Input />
                     </NumberInput.Root>

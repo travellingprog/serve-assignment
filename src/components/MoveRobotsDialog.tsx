@@ -19,6 +19,7 @@ interface Props {
   onClose: () => void
 }
 
+/** Our dialog to move all the robots a certain distance */
 export function MoveRobotsDialog(props: Props) {
   const [meters, setMeters] = useState('')
   const { trigger, errorMsg, isMutating } = useMoveRobots()

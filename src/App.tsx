@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useEffect, useEffectEvent } from 'react';
 import Map, { Source, Layer, useMap } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -9,6 +9,7 @@ import { useRobots } from '@/hooks/api';
 import type { FeatureCollection, Point } from 'geojson';
 import type { Robot } from './hooks/api';
 
+/** Converts a Robot array into point data that can be set as a Source */
 function robotsToPointCollection(robots: Robot[]): FeatureCollection<Point> {
   return {
     type: 'FeatureCollection',
@@ -19,26 +20,77 @@ function robotsToPointCollection(robots: Robot[]): FeatureCollection<Point> {
         type: 'Point',
         coordinates: [robot.position[1], robot.position[0]],
       },
-      properties: { name: `robot ${robot.index}`},
+      properties: {
+        name: `robot ${robot.index}`,
+        colorIndex: (robot.index % 20),
+      },
     }))
   }
 }
 
+/** The content that is placed on top of the map */
 function MapContent() {
   const { current: map } = useMap();
   const { robots } = useRobots()
   const dataRef = useRef<FeatureCollection<Point>>(robotsToPointCollection(robots));
+  const animationRef = useRef<number | null>(null);
+
+  // update the source data outside of the React lifecycle, for better performance
+  const updateSource = useEffectEvent((data: FeatureCollection<Point>) => {
+    // Safety check for map instance
+    if (!map) return;
+
+    // Cast the source type to GeoJSONSource to access .setData()
+    const source = map.getSource('robots-source') as maplibregl.GeoJSONSource;
+    if (source) {
+      source.setData(data);
+    }
+  })
 
   useEffect(() => {
     // Safety check for map instance
     if (!map) return;
 
-    dataRef.current.features = robotsToPointCollection(robots).features
+    // if number of robots has changed, no need for smooth animation
+    if (dataRef.current.features.length !== robots.length) {
+      dataRef.current.features = robotsToPointCollection(robots).features
+      updateSource(dataRef.current)
+      return
+    }
 
-    // Cast the source type to GeoJSONSource to access .setData()
-    const source = map.getSource('robots-source') as maplibregl.GeoJSONSource;
-    if (source) {
-      source.setData(dataRef.current);
+    // get the start and end coordinates of our animation
+    const startCoords = dataRef.current.features.map((feature) => feature.geometry.coordinates);
+    const endCoords = robots.map((robot) => [robot.position[1], robot.position[0]])
+
+    let startTime: number | null = null;
+    const animationMs = 1000 // animation duration
+
+    // run this for each animation frame
+    const frame = (time: number) => {
+      if (!startTime) startTime = time;
+      const percentProgress = Math.min((time - startTime) / animationMs, 1);
+
+      startCoords.forEach((startCoord, idx) => {
+        const endCoord = endCoords[idx]
+        const newCoord = [
+          startCoord[0] + ((endCoord[0] - startCoord[0]) * percentProgress),
+          startCoord[1] + ((endCoord[1] - startCoord[1]) * percentProgress),
+        ]
+        dataRef.current.features[idx].geometry.coordinates = newCoord
+      })
+
+      updateSource(dataRef.current)
+
+      if (percentProgress < 1) {
+        animationRef.current = requestAnimationFrame(frame);
+      }
+    };
+
+    // initiate animation
+    animationRef.current = requestAnimationFrame(frame);
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
     }
   }, [map, robots])
 
@@ -54,9 +106,17 @@ function MapContent() {
           type="circle"
           paint={{
             'circle-radius': 10,
-            'circle-color': '#ef4444',
             'circle-stroke-width': 2,
-            'circle-stroke-color': '#ffffff'
+            'circle-stroke-color': '#ffffff',
+
+            // make the color dynamic to more easily distinguish the robots
+            'circle-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'colorIndex'],
+              0, '#38e917',   // Green
+              20, '#d51714'  // Red
+            ],
           }}
         />
       </Source>
@@ -64,82 +124,7 @@ function MapContent() {
   );
 }
 
-// TODO Delete
-const INITIAL_DATA: FeatureCollection<Point> = {
-  type: 'FeatureCollection',
-  features: [{
-    type: 'Feature',
-    id: 1,
-    geometry: {
-      type: 'Point',
-      coordinates: [-118.2437, 34.0522]
-    },
-    properties: { name: 'Moving Marker' }
-  }]
-};
-
-// TODO Delete
-function MapContentOld() {
-  const { current: map } = useMap();
-
-  const dataRef = useRef<FeatureCollection<Point>>(INITIAL_DATA);
-  const animationRef = useRef<number | null>(null);
-
-  const startDirectAnimation = useCallback((targetLng: number, targetLat: number) => {
-    // Safety check for map instance and existing feature
-    if (!map || !dataRef.current.features[0]) return;
-
-    const start = dataRef.current.features[0].geometry.coordinates as [number, number];
-    const end: [number, number] = [targetLng, targetLat];
-    let startTime: number | null = null;
-
-    const frame = (time: number) => {
-      if (!startTime) startTime = time;
-      const progress = Math.min((time - startTime) / 1000, 1);
-
-      const lng = start[0] + (end[0] - start[0]) * progress;
-      const lat = start[1] + (end[1] - start[1]) * progress;
-      dataRef.current.features[0].geometry.coordinates = [lng, lat];
-
-      // Cast the source to GeoJSONSource to access .setData()
-      const source = map.getSource('moving-source') as maplibregl.GeoJSONSource;
-
-      if (source) {
-        source.setData(dataRef.current);
-      }
-
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(frame);
-      }
-    };
-
-    animationRef.current = requestAnimationFrame(frame);
-  }, [map]);
-
-  return (
-    <>
-      <button
-        onClick={() => startDirectAnimation(-118.26, 34.04)}
-      >
-        Move to LA Live
-      </button>
-
-      <Source id="moving-source" type="geojson" data={dataRef.current}>
-        <Layer
-          id="point-layer"
-          type="circle"
-          paint={{
-            'circle-radius': 12,
-            'circle-color': '#ef4444',
-            'circle-stroke-width': 3,
-            'circle-stroke-color': '#ffffff'
-          }}
-        />
-      </Source>
-    </>
-  );
-}
-
+/** Our app entry point, the map */
 export default function App() {
   return (
     <Map
